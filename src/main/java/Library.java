@@ -22,9 +22,8 @@ public class Library {
         final List<Book> books = new ArrayList<>();
         final String[] data = Database.getData();
         try(
-
-                Connection conn = DriverManager.getConnection(data[0]);
-                PreparedStatement pstmt = conn.prepareStatement( QUERY )
+            Connection conn = DriverManager.getConnection(data[0]);
+            PreparedStatement pstmt = conn.prepareStatement( QUERY )
         ) {
             ResultSet results =  pstmt.executeQuery();
             while (results.next()){
@@ -32,6 +31,7 @@ public class Library {
                 book.setTitolo(results.getString("Titolo"));
                 book.setAutore(results.getString("Autore"));
                 book.setISBN(results.getString("ISBN"));
+                book.setPrestitoAttivo(results.getString("PrestitoAttivo"));
                 books.add(book);
 
             }
@@ -50,7 +50,8 @@ public class Library {
     @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
     public Response update(@FormParam("ISBN") String isbn,
                            @FormParam("Titolo")String titolo,
-                           @FormParam("Autore") String autore){
+                           @FormParam("Autore") String autore,
+                           @FormParam("PrestitoAttivo") String prestitoAttivo){
         if(checkParams(isbn, titolo, autore)) {
             String obj = new Gson().toJson("Parameters must be valid");
             return Response.serverError().entity(obj).build();
@@ -81,7 +82,8 @@ public class Library {
     @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
     public Response create(@FormParam("ISBN") String isbn,
                            @FormParam("Titolo")String titolo,
-                           @FormParam("Autore") String autore){
+                           @FormParam("Autore") String autore,
+                           @FormParam("PrestitoAttivo") String prestitoAttivo){
         if(checkParams(isbn, titolo, autore)) {
             String obj = new Gson().toJson("Parameters must be valid");
             return Response.serverError().entity(obj).build();
@@ -95,7 +97,8 @@ public class Library {
         ) {
             pstmt.setString(1,isbn);
             pstmt.setString(2,autore);
-            pstmt.setString(3,titolo);
+            pstmt.setString(3, titolo);
+            pstmt.setString(4,prestitoAttivo);
             pstmt.execute();
         }catch (SQLException e){
             e.printStackTrace();
